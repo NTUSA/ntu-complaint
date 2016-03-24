@@ -13,13 +13,13 @@ def fetch(number, cookie):
 def search_one(pattern, string):
     match = re.search(pattern, string)
     if match is not None:
-        match = match.group(1)
+        match = match.group(1).strip()
     return match
 
 def search_multiline(pattern, string):
     match = re.search(pattern, string)
     if match is not None:
-        match = html.unescape(match.group(1).replace('<br>', '\n'))
+        match = html.unescape(match.group(1).replace('<br>', '\n')).strip()
     return match
 
 def parse(text):
@@ -41,6 +41,11 @@ def parse(text):
         'category': search_one(r'建議議題類別</strong></td>\s*<td[^>]*>([^<]+)</td>', text),
         'subject': search_one(r'主旨</strong></td>\s*<td[^>]*>([^<]+)</td>', text),
         'complaint': search_multiline(r'建議內容</strong></td>\s*<td[^>]*>(.+?)</td>', text),
+
+        'status': search_one(r'處理情形</strong></td>\s*<td[^>]*>([^<]+)</td>', text),
+        'responder': search_one(r'回覆單位</strong></td>\s*<td[^>]*>([^<]+)</td>', text),
+        'response': search_multiline(r'回覆內容</strong></td>\s*<td[^>]*>(.+?)</td>', text),
+        'date': search_one(r'回覆時間</strong></td>\s*<td[^>]*>([^<]+)</td>', text),
     }
 
 try:
