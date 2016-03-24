@@ -2,7 +2,8 @@ import html
 import json
 import requests
 import re
-from sys import argv, stderr, exit
+from colorama import Fore, Style
+from sys import stderr
 
 def fetch(number, cookie):
     url = 'https://mis.cc.ntu.edu.tw/suggest/asp/show.asp?sn=%s' % number
@@ -30,9 +31,11 @@ def parse(text):
 
     number = search_one(r'金玉集</a> \| 第 (\d+) 則建言', text)
     if not number:
+        stderr.write(Fore.RED + Style.BRIGHT)
         stderr.write('Cannot parse text properly, see if cookie expired\n')
+        stderr.write(Fore.WHITE)
         stderr.write(text)
-        stderr.write('\n\n')
+        stderr.write(Style.RESET_ALL + '\n\n')
         raise Exception('Parse failed')
 
     return {
@@ -48,16 +51,19 @@ def parse(text):
         'date': search_one(r'回覆時間</strong></td>\s*<td[^>]*>([^<]+)</td>', text),
     }
 
-try:
-    with open('cookie.json', 'r') as f:
-        cookie = json.load(f)
-except IOError:
-    stderr.write('Cookie file not found\n')
-    exit(-1)
+if __name__ == '__main__':
+    from sys import argv, exit
 
-if len(argv) < 2:
-    # Default action
-    print('Usage: python fetch.py <number>')
-elif len(argv) == 2:
-    number = int(argv[1])
-    print(parse(fetch(number, cookie=cookie)))
+    try:
+        with open('cookie.json', 'r') as f:
+            cookie = json.load(f)
+    except IOError:
+        stderr.write('Cookie file not found\n')
+        exit(-1)
+
+    if len(argv) < 2:
+        # Default action
+        print('Usage: python fetch.py <number>')
+    elif len(argv) == 2:
+        number = int(argv[1])
+        print(parse(fetch(number, cookie=cookie)))
