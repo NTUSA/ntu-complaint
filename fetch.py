@@ -23,6 +23,11 @@ def search_multiline(pattern, string):
         match = html.unescape(match.group(1).replace('<br>', '\n')).strip()
     return match
 
+def print_err(text, color=Style.RESET_ALL):
+    stderr.write(color)
+    stderr.write(text)
+    stderr.write('\n')
+
 def parse(text):
     if r'<td width="100%">無此篇建議案</td>' in text:
         return { 'error': 'not_found' }
@@ -31,11 +36,9 @@ def parse(text):
 
     number = search_one(r'金玉集</a> \| 第 (\d+) 則建言', text)
     if not number:
-        stderr.write(Fore.RED + Style.BRIGHT)
-        stderr.write('Cannot parse text properly, see if cookie expired\n')
-        stderr.write(Fore.WHITE)
-        stderr.write(text)
-        stderr.write(Style.RESET_ALL + '\n\n')
+        print_err('Cannot parse text properly, see if cookie expired', Fore.RED + Style.BRIGHT)
+        print_err(text, Fore.WHITE)
+        print_err('\n\n')
         raise Exception('Parse failed')
 
     return {
@@ -58,7 +61,7 @@ if __name__ == '__main__':
         with open('cookie.json', 'r') as f:
             cookie = json.load(f)
     except IOError:
-        stderr.write('Cookie file not found\n')
+        print_err('Cookie file not found', Fore.RED)
         exit(-1)
 
     if len(argv) < 2:
