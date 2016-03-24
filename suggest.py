@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import html
 import json
 import requests
@@ -36,9 +37,10 @@ def parse(text):
 
     number = search_one(r'金玉集</a> \| 第 (\d+) 則建言', text)
     if not number:
-        print_err('Cannot parse text properly, see if cookie expired', Fore.RED + Style.BRIGHT)
-        print_err(text, Fore.WHITE)
-        print_err('\n\n')
+        print_err('ERR: Cannot parse text properly, see if cookie expired.', Fore.RED + Style.BRIGHT)
+        print_err('Original string:')
+        print_err(text, Style.BRIGHT + Fore.WHITE)
+        print_err('\n')
         raise Exception('Parse failed')
 
     return {
@@ -83,7 +85,7 @@ if __name__ == '__main__':
         exit()
 
     for number in ids:
-        text = fetch(number)
+        text = fetch(number, args.cookie)
         data = parse(text)
         if args.save:
             with open('files/%s.json' % number, 'w') as output:
