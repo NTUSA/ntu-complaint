@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     if len(argv) < 2:
         # Default action
-        print('Usage: python fetch.py <number>')
+        print('Usage: python suggest.py <number>')
     elif len(argv) == 2:
         number = int(argv[1])
         print(parse(fetch(number, cookie=cookie)))
