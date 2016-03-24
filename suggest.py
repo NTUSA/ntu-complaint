@@ -55,18 +55,38 @@ def parse(text):
     }
 
 if __name__ == '__main__':
-    from sys import argv, exit
+    import argparse
+    from sys import stdout, exit
 
-    try:
-        with open('cookie.json', 'r') as f:
-            cookie = json.load(f)
-    except IOError:
-        print_err('Cookie file not found', Fore.RED)
-        exit(-1)
+    def load_json(filename):
+        with open(filename, 'r') as f:
+            return json.load(f)
 
-    if len(argv) < 2:
-        # Default action
-        print('Usage: python suggest.py <number>')
-    elif len(argv) == 2:
-        number = int(argv[1])
-        print(parse(fetch(number, cookie=cookie)))
+    parser = argparse.ArgumentParser(description='Fetch and parse campus suggestions.')
+    parser.add_argument('-s', '--save', action='store_true', help='Stores the parsed information to file.')
+    parser.add_argument('-c', '--cookie', type=load_json, default='cookie.json', help='Cookie file to use. (default: cookie.json)')
+
+    group = parser.add_argument_group(title='Batch operation', description='Specifies a range of suggestion IDs.')
+    group.add_argument('-f', '--from', type=int, metavar='id', dest='start', help='Starting ID, inclusive.')
+    group.add_argument('-t', '--to', type=int, metavar='id', dest='stop', help='Ending ID, inclusive.')
+
+    parser.add_argument('id', nargs='*', type=int, help='Suggestion ID(s) to acquire.')
+
+    args = parser.parse_args()
+
+    if args.start and args.stop:
+        ids = range(args.start, args.stop + 1)
+    elif args.id:
+        ids = args.id
+    else:
+        parser.print_help()
+        exit()
+
+    for number in ids:
+        text = fetch(number)
+        data = parse(text)
+        if args.save:
+            with open('files/%s.json' % number, 'w') as output:
+                json.dump(data, output, ensure_ascii=False, indent='\t')
+        else:
+            json.dump(data, stdout, ensure_ascii=False, indent=2)
