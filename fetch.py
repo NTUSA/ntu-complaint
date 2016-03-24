@@ -1,5 +1,7 @@
+import json
 import requests
 import re
+from sys import stderr, exit
 
 def fetch(number, cookie):
     url = 'https://mis.cc.ntu.edu.tw/suggest/asp/show.asp?sn=%s' % number
@@ -7,4 +9,11 @@ def fetch(number, cookie):
     request.encoding = 'big5'
     return request.text
 
-fetch(8845, ASPSESSIONID='HelloWorld')
+try:
+    with open('cookie.json', 'r') as f:
+        cookie = json.load(f)
+except IOError:
+    stderr.write('Cookie file not found')
+    exit(-1)
+
+print(fetch(8845, cookie=cookie))
