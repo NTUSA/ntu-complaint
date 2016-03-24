@@ -27,7 +27,10 @@ def parse(text):
         raise Exception('Parse failed')
 
     return {
-        'number': number
+        'number': number,
+        'identity': search_one(r'建議者身份</strong></td>\s*<td[^>]*>([^<]+)</td>', text),
+        'category': search_one(r'建議議題類別</strong></td>\s*<td[^>]*>([^<]+)</td>', text),
+        'subject': search_one(r'主旨</strong></td>\s*<td[^>]*>([^<]+)</td>', text),
     }
 
 try:
