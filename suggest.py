@@ -86,13 +86,38 @@ if __name__ == '__main__':
         parser.print_help()
         exit()
 
+    respond_count, empty_count, unauthorized_count, non_existent_count = (0, 0, 0, 0)
     for number in ids:
         text = fetch(number, args.cookie)
         data = parse(text)
+
         if args.save:
-            if not data['response'] or not data['complaint']:
+            # Count statistics
+            if data.get('error') == 'unauthorized':
+                unauthorized_count += 1
+            elif data.get('error') == 'not_found':
+                non_existent_count += 1
+            elif not data['response'] or not data['complaint']:
+                empty_count += 1
                 print_err('WARN: Suggestion #%s is empty' % number, Fore.YELLOW, bright=True)
+            else:
+                respond_count += 1
+
+            # Save file
             with open('files/%s.json' % number, 'w') as output:
                 json.dump(data, output, ensure_ascii=False, indent='\t')
+
         else:
             json.dump(data, stdout, ensure_ascii=False, indent=2)
+
+    # Print statistics if available
+    if args.save:
+        print('Statistics:\n')
+        print('  Responses:    \t%s%s%s' % (Style.BRIGHT if respond_count else Style.DIM, respond_count, Style.RESET_ALL))
+        print('  With warnings:\t%s%s%s' % (Style.BRIGHT + Fore.YELLOW if empty_count else Style.DIM, empty_count, Style.RESET_ALL))
+        print('  Unauthorized: \t%s%s%s' % (Style.BRIGHT + Fore.RED if unauthorized_count else Style.DIM, unauthorized_count, Style.RESET_ALL))
+        print('  Non-existent: \t%s%s%s' % (Style.BRIGHT + Fore.RED if non_existent_count else Style.DIM, non_existent_count, Style.RESET_ALL))
+
+        total = (respond_count + empty_count + unauthorized_count + non_existent_count)
+        print('')
+        print('  Total responses:\t%s\n' % total)
