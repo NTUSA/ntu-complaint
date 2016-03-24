@@ -1,7 +1,7 @@
 import json
 import requests
 import re
-from sys import stderr, exit
+from sys import argv, stderr, exit
 
 def fetch(number, cookie):
     url = 'https://mis.cc.ntu.edu.tw/suggest/asp/show.asp?sn=%s' % number
@@ -25,7 +25,7 @@ def parse(text):
     if not number:
         stderr.write('Cannot parse text properly, see if cookie expired')
         raise Exception('Parse failed')
-    
+
     return {
         'number': number
     }
@@ -37,4 +37,9 @@ except IOError:
     stderr.write('Cookie file not found')
     exit(-1)
 
-print(parse(fetch(8845, cookie=cookie)))
+if len(argv) < 2:
+    # Default action
+    print('Usage: python fetch.py <number>')
+elif len(argv) == 2:
+    number = int(argv[1])
+    print(parse(fetch(number, cookie=cookie)))
