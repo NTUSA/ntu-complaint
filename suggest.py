@@ -24,7 +24,9 @@ def search_multiline(pattern, string):
         match = html.unescape(match.group(1).replace('<br>', '\n')).strip()
     return match
 
-def print_err(text, color=Style.RESET_ALL):
+def print_err(text, color=Style.RESET_ALL, bright=False):
+    if bright:
+        stderr.write(Style.BRIGHT)
     stderr.write(color)
     stderr.write(text)
     stderr.write('\n')
@@ -37,9 +39,9 @@ def parse(text):
 
     number = search_one(r'金玉集</a> \| 第 (\d+) 則建言', text)
     if not number:
-        print_err('ERR: Cannot parse text properly, see if cookie expired.', Fore.RED + Style.BRIGHT)
+        print_err('ERR: Cannot parse text properly, see if cookie expired.', Fore.RED, bright=True)
         print_err('Original string:')
-        print_err(text, Style.BRIGHT + Fore.WHITE)
+        print_err(text, Fore.WHITE, bright=True)
         print_err('\n')
         raise Exception('Parse failed')
 
@@ -88,6 +90,8 @@ if __name__ == '__main__':
         text = fetch(number, args.cookie)
         data = parse(text)
         if args.save:
+            if not data['response'] or not data['complaint']:
+                print_err('WARN: Suggestion #%s is empty' % number, Fore.YELLOW, bright=True)
             with open('files/%s.json' % number, 'w') as output:
                 json.dump(data, output, ensure_ascii=False, indent='\t')
         else:

@@ -1,5 +1,6 @@
 __pycache__/
 env/
 example/
+files/*.json
 .DS_Store
 cookie.json
